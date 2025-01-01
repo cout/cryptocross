@@ -1,6 +1,7 @@
 import re
 import sys
 from collections import defaultdict
+from dataclasses import dataclass, field
 
 class GridProperties:
   def __init__(self, gtype, width, height, symmr, symmm, symmd):
@@ -82,11 +83,16 @@ class Dictionaries:
     self.dsfilters = { }
     self.dafilters = { }
 
+@dataclass
 class Puzzle:
-  def __init__(self):
-    self.grid_properties = None
-    self.dictionaries = Dictionaries()
-    self.squares = defaultdict(dict)
+  title: str | None = None
+  author: str | None = None
+  squares: defaultdict = field(default_factory=lambda: defaultdict(dict))
+  grid_properties: GridProperties | None = None
+  default_light_properties: LightProperties | None = None
+  default_square_properties: SquareProperties | None = None
+  treatment: Treatment | None = None
+  dictionaries: Dictionaries = Dictionaries()
 
   def __getitem__(self, xy):
     x, y = xy
