@@ -128,21 +128,15 @@ class HTMLGenerator:
 
 
 def find_not_blocked_squares(puzzle):
-  width = puzzle.width
-  height = puzzle.height
-
   not_blocked = [ ]
-  for y in range(0, height):
-    for x in range(0, width):
+  for y in range(0, puzzle.height):
+    for x in range(0, puzzle.width):
       sq = puzzle[x, y]
       if not sq.blocked: not_blocked.append((x, y))
 
   return not_blocked
 
 def revealed_coords(puzzle):
-  width = puzzle.width
-  height = puzzle.height
-
   not_blocked = find_not_blocked_squares(puzzle)
 
   reveal = [ ]
@@ -151,19 +145,16 @@ def revealed_coords(puzzle):
 
   if x > 1 and not puzzle[x-1, y].blocked: reveal.append((x-1, y))
   elif y > 1 and not puzzle[x, y-1].blocked: reveal.append((x, y-1))
-  elif x < width and not puzzle[x+1, y].blocked: reveal.append((x+1, y)) # TODO: this check can access a square that is in-bounds but not in the dict (saw it on a 17x17 with KeyError for 9)
-  elif y < height and not puzzle[x, y+1].blocked: reveal.append((x, y+1))
+  elif x < puzzle.width and not puzzle[x+1, y].blocked: reveal.append((x+1, y)) # TODO: this check can access a square that is in-bounds but not in the dict (saw it on a 17x17 with KeyError for 9)
+  elif y < puzzle.height and not puzzle[x, y+1].blocked: reveal.append((x, y+1))
 
   return reveal
 
 def find_words_across(puzzle):
-  width = puzzle.width
-  height = puzzle.height
-
   words_across = [ ]
-  for y in range(0, height):
+  for y in range(0, puzzle.height):
     word = ''
-    for x in range(0, width):
+    for x in range(0, puzzle.width):
       sq = puzzle[x, y]
       if sq.blocked:
         if len(word) > 1: words_across.append(word)
@@ -175,13 +166,10 @@ def find_words_across(puzzle):
   return words_across
 
 def find_words_down(puzzle):
-  width = puzzle.width
-  height = puzzle.height
-
   words_down = [ ]
-  for x in range(0, width):
+  for x in range(0, puzzle.width):
     word = ''
-    for y in range(0, height):
+    for y in range(0, puzzle.height):
       sq = puzzle[x, y]
       if sq.blocked:
         if len(word) > 1: words_down.append(word)
@@ -228,18 +216,16 @@ def main(argv):
   puzzle = qxw.read_file(args[1])
 
   title = opts.title or puzzle.title
-  width = puzzle.width
-  height = puzzle.height
 
   reveal = revealed_coords(puzzle)
 
   letters = list(string.ascii_uppercase)
   codex = make_codex(letters)
 
-  gen = HTMLGenerator(width, height, letters, title)
+  gen = HTMLGenerator(puzzle.width, puzzle.height, letters, title)
 
-  for y in range(0, height):
-    for x in range(0, width):
+  for y in range(0, puzzle.height):
+    for x in range(0, puzzle.width):
       sq = puzzle[x, y]
       gen.add_square(sq, codex, (x, y) in reveal)
 
