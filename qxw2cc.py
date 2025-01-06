@@ -139,6 +139,23 @@ def find_not_blocked_squares(puzzle):
 
   return not_blocked
 
+def revealed_coords(puzzle):
+  width = puzzle.grid_properties.width
+  height = puzzle.grid_properties.height
+
+  not_blocked = find_not_blocked_squares(puzzle)
+
+  reveal = [ ]
+  x, y = random.sample(not_blocked, k=1)[0]
+  reveal.append((x, y))
+
+  if x > 1 and not puzzle[x-1, y].blocked: reveal.append((x-1, y))
+  elif y > 1 and not puzzle[x, y-1].blocked: reveal.append((x, y-1))
+  elif x < width and not puzzle[x+1, y].blocked: reveal.append((x+1, y)) # TODO: this check can access a square that is in-bounds but not in the dict (saw it on a 17x17 with KeyError for 9)
+  elif y < height and not puzzle[x, y+1].blocked: reveal.append((x, y+1))
+
+  return reveal
+
 def find_words_across(puzzle):
   width = puzzle.grid_properties.width
   height = puzzle.grid_properties.height
@@ -214,16 +231,7 @@ def main(argv):
   width = puzzle.grid_properties.width
   height = puzzle.grid_properties.height
 
-  not_blocked = find_not_blocked_squares(puzzle)
-
-  reveal = [ ]
-  x, y = random.sample(not_blocked, k=1)[0]
-  reveal.append((x, y))
-
-  if x > 1 and not puzzle[x-1, y].blocked: reveal.append((x-1, y))
-  elif y > 1 and not puzzle[x, y-1].blocked: reveal.append((x, y-1))
-  elif x < width and not puzzle[x+1, y].blocked: reveal.append((x+1, y)) # TODO: this check can access a square that is in-bounds but not in the dict (saw it on a 17x17 with KeyError for 9)
-  elif y < height and not puzzle[x, y+1].blocked: reveal.append((x, y+1))
+  reveal = revealed_coords(puzzle)
 
   letters = list(string.ascii_uppercase)
   codex = make_codex(letters)
