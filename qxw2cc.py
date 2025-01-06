@@ -6,6 +6,7 @@
 # 3. Save file
 
 from pathlib import Path
+from optparse import OptionParser
 import string
 import random
 import copy
@@ -32,6 +33,7 @@ css = '''
 	--letter-font-size: 22px;
 }
 body { font-family: sans-serif; }
+.title { text-align: center; }
 main-grid { display: grid; grid-template-columns: var(--workspace-width) var(--workspace-width) 1fr 1fr; column-gap: 1em; }
 puzzle { display: grid; gap: var(--border-size); grid-auto-flow: row; grid-auto-rows: var(--cell-height); position: relative; }
 workspace { display: grid; gap: var(--border-size); grid-auto-flow: column; grid-template-rows: repeat(13, var(--cell-height)); grid-auto-columns: var(--cell-width); }
@@ -45,11 +47,22 @@ word { }
 '''
 
 class HTMLGenerator:
-  def __init__(self, width, height, letters):
+  def __init__(self, width, height, letters, title):
     self.doc = BeautifulSoup('<html><head></head><body></body></html>', 'lxml')
     self.width = width
     self.height = height
+    self.title = title
     self.square_count = 0
+
+    if title:
+      e_title = self.doc.new_tag('title')
+      e_title.string = title
+      self.doc.head.append(e_title)
+
+      e_title_heading = self.doc.new_tag('h1')
+      e_title_heading['class'] = 'title'
+      e_title_heading.string = title
+      self.doc.body.append(e_title_heading)
 
     style = self.doc.new_tag('style', type='text/css')
     style.string = css
@@ -187,9 +200,18 @@ def hide_letters(words, hidden_letters):
   words = [ word.translate(table) for word in words ]
   return words
 
-def main(argv):
-  puzzle = qxw.read_file(argv[1])
+def parse_args(argv):
+  parser = OptionParser()
+  parser.add_option('-t', '--title', dest='title')
+  opts, args = parser.parse_args(argv)
+  return opts, args
 
+def main(argv):
+  opts, args = parse_args(argv)
+
+  puzzle = qxw.read_file(args[1])
+
+  title = opts.title or puzzle.title
   width = puzzle.grid_properties.width
   height = puzzle.grid_properties.height
 
@@ -207,7 +229,7 @@ def main(argv):
   letters = list(string.ascii_uppercase)
   codex = make_codex(letters)
 
-  gen = HTMLGenerator(width, height, letters)
+  gen = HTMLGenerator(width, height, letters, title)
 
   for y in range(0, height):
     for x in range(0, width):
