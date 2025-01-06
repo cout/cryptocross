@@ -14,9 +14,6 @@ import sys
 
 import qxw
 
-# "Configuration"...
-HIDE_LETTERS_IN_REVEALED_WORDS_CHANCE = 0.75
-
 try: 
   from BeautifulSoup import BeautifulSoup
 except ImportError:
@@ -203,11 +200,13 @@ def hide_letters(words, hidden_letters):
 def parse_args(argv):
   parser = OptionParser()
   parser.add_option('-t', '--title', dest='title')
+  parser.add_option('--chance-hide-letters-in-revealed-words', type=float, default=0.5)
   opts, args = parser.parse_args(argv)
   return opts, args
 
 def main(argv):
   opts, args = parse_args(argv)
+  print('Opts:', opts, file=sys.stderr)
 
   puzzle = qxw.read_file(args[1])
 
@@ -258,7 +257,7 @@ def main(argv):
   # letters.  Need a better heuristic for deciding which letters in a
   # word to hide.
   for word in revealed_words:
-    if random.uniform(0, 1) < HIDE_LETTERS_IN_REVEALED_WORDS_CHANCE:
+    if random.uniform(0, 1) < opts.chance_hide_letters_in_revealed_words:
       hidden_letters.update(word)
 
 
