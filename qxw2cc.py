@@ -128,8 +128,8 @@ class HTMLGenerator:
 
 
 def find_not_blocked_squares(puzzle):
-  width = puzzle.grid_properties.width
-  height = puzzle.grid_properties.height
+  width = puzzle.width
+  height = puzzle.height
 
   not_blocked = [ ]
   for y in range(0, height):
@@ -140,8 +140,8 @@ def find_not_blocked_squares(puzzle):
   return not_blocked
 
 def revealed_coords(puzzle):
-  width = puzzle.grid_properties.width
-  height = puzzle.grid_properties.height
+  width = puzzle.width
+  height = puzzle.height
 
   not_blocked = find_not_blocked_squares(puzzle)
 
@@ -157,8 +157,8 @@ def revealed_coords(puzzle):
   return reveal
 
 def find_words_across(puzzle):
-  width = puzzle.grid_properties.width
-  height = puzzle.grid_properties.height
+  width = puzzle.width
+  height = puzzle.height
 
   words_across = [ ]
   for y in range(0, height):
@@ -175,8 +175,8 @@ def find_words_across(puzzle):
   return words_across
 
 def find_words_down(puzzle):
-  width = puzzle.grid_properties.width
-  height = puzzle.grid_properties.height
+  width = puzzle.width
+  height = puzzle.height
 
   words_down = [ ]
   for x in range(0, width):
@@ -228,8 +228,8 @@ def main(argv):
   puzzle = qxw.read_file(args[1])
 
   title = opts.title or puzzle.title
-  width = puzzle.grid_properties.width
-  height = puzzle.grid_properties.height
+  width = puzzle.width
+  height = puzzle.height
 
   reveal = revealed_coords(puzzle)
 

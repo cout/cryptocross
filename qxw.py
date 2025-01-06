@@ -108,6 +108,14 @@ class Puzzle:
   def __repr__(self):
     return f'Puzzle({self.__dict__})'
 
+  @property
+  def width(self):
+    return self.grid_properties.width
+
+  @property
+  def height(self):
+    return self.grid_properties.height
+
 def read(file):
   p = Puzzle()
 
