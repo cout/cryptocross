@@ -100,6 +100,12 @@ class HTMLGenerator:
     self.e_main_grid.append(self.e_words)
     self.e_main_grid.append("\n")
 
+  def add_squares(self, puzzle, codex, revealed_coords):
+    for y in range(0, self.height):
+      for x in range(0, self.width):
+        sq = puzzle[x, y]
+        self.add_square(sq, codex, (x, y) in revealed_coords)
+
   def add_square(self, sq, codex, reveal):
     e_square = self.doc.new_tag('sq')
     if sq.blocked:
@@ -217,25 +223,18 @@ def main(argv):
 
   title = opts.title or puzzle.title
 
-  reveal = revealed_coords(puzzle)
-
   letters = list(string.ascii_uppercase)
   codex = make_codex(letters)
 
   gen = HTMLGenerator(puzzle.width, puzzle.height, letters, title)
 
-  for y in range(0, puzzle.height):
-    for x in range(0, puzzle.width):
-      sq = puzzle[x, y]
-      gen.add_square(sq, codex, (x, y) in reveal)
+  reveal = revealed_coords(puzzle)
+
+  gen.add_squares(puzzle, codex, reveal)
 
   words = find_all_words(puzzle)
 
   revealed_letters = [ puzzle[x, y].letter for x, y in reveal ]
-
-  # TODO: if I forget to accept autofill hints, then I get an exception.
-  # This fixes the exception but then the puzzle is blank.
-  # revealed_letters = [ c for c in revealed_letters if c != '' ]
 
   revealed_words = [ ]
   for word in words:
