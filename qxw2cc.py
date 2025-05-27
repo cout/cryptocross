@@ -208,6 +208,32 @@ def hide_letters(words, hidden_letters):
   words = [ word.translate(table) for word in words ]
   return words
 
+def make_word_bank(puzzle, revealed_coords, opts):
+  words = find_all_words(puzzle)
+
+  revealed_letters = [ puzzle[x, y].letter for x, y in revealed_coords ]
+
+  revealed_words = [ ]
+  for word in words:
+    count = 0
+    for letter in set(revealed_letters):
+      count += word.count(letter)
+    if count > 1:
+      revealed_words.append(word)
+
+  hidden_letters = set(revealed_letters)
+
+  # TODO: This either hides too few letters or doesn't hide enough
+  # letters.  Need a better heuristic for deciding which letters in a
+  # word to hide.
+  for word in revealed_words:
+    if random.uniform(0, 1) < opts.chance_hide_letters_in_revealed_words:
+      hidden_letters.update(word)
+
+  words = hide_letters(words, hidden_letters)
+
+  return words
+
 def parse_args(argv):
   parser = OptionParser()
   parser.add_option('-t', '--title', dest='title')
@@ -232,43 +258,12 @@ def main(argv):
 
   gen.add_squares(puzzle, codex, reveal)
 
-  words = find_all_words(puzzle)
+  words = make_word_bank(puzzle, reveal, opts)
 
-  revealed_letters = [ puzzle[x, y].letter for x, y in reveal ]
-
-  revealed_words = [ ]
-  for word in words:
-    count = 0
-    for letter in set(revealed_letters):
-      count += word.count(letter)
-    if count > 1:
-      revealed_words.append(word)
-
-  hidden_letters = set(revealed_letters)
-
-  # TODO: This either hides too few letters or doesn't hide enough
-  # letters.  Need a better heuristic for deciding which letters in a
-  # word to hide.
-  for word in revealed_words:
-    if random.uniform(0, 1) < opts.chance_hide_letters_in_revealed_words:
-      hidden_letters.update(word)
-
-
-  print('## before hiding letters:', words, file=sys.stderr)
-  words = hide_letters(words, hidden_letters)
-  print('## after hiding letters:', words, file=sys.stderr)
   gen.add_words(words)
 
   print(gen.doc)
   sys.stdout.flush()
-
-  print('revealed', reveal, file=sys.stderr)
-  for x, y in reveal:
-    sq = puzzle[x, y]
-    print(sq, file=sys.stderr)
-
-  print('revealed words', revealed_words, file=sys.stderr)
-  print('hidden letters', hidden_letters, file=sys.stderr)
 
 if __name__ == '__main__':
   main(sys.argv)
