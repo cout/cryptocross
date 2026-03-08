@@ -11,6 +11,7 @@ import string
 import random
 import copy
 import sys
+import re
 
 import qxw
 
@@ -234,6 +235,55 @@ def make_word_bank(puzzle, revealed_coords, opts):
 
   return words
 
+def candidate_words(words, obfuscated_word):
+  regex = re.compile('^' + obfuscated_word.replace('_', '.') + '$')
+  candidates = [ word for word in words if regex.match(word) ]
+  return candidates
+
+def max_candidates(word_len):
+  if word_len == 2:
+    return 1000
+  elif word_len == 3 or word_len == 4:
+    return 4
+  else:
+    return 3
+
+def max_hidden_letters(word_len):
+  if word_len < 5:
+    return word_len
+  elif word_len < 7:
+    return word_len - 1
+  else:
+    return word_len - word_len // 4
+
+def is_viable_word(word, words):
+  word_len = len(word)
+  hidden_letter_count = word.count('_')
+  candidates = candidate_words(words, word)
+  if len(candidates) < max_candidates(word_len) and hidden_letter_count < max_hidden_letters(word_len):
+    print(f'{word}: {len(candidates)} < {max_candidates(len(word))}: {", ".join(candidates)}', file=sys.stderr)
+    return True
+  else:
+    return False
+
+def make_word_bank_v2(puzzle, revealed_coords, opts):
+  words = find_all_words(puzzle)
+  word_bank = words.copy()
+
+  # First, hide all the revealed letters:
+  revealed_letters = set(puzzle[x, y].letter for x, y in revealed_coords)
+  words = hide_letters(words, revealed_letters)
+
+  for i in range(0, 1000):
+    idx = random.randrange(len(word_bank))
+    word = word_bank[idx]
+    new_word = hide_one_letter(word)
+    if is_viable_word(new_word, words):
+      word_bank[idx] = new_word
+
+  return word_bank
+
+
 def parse_args(argv):
   parser = OptionParser()
   parser.add_option('-t', '--title', dest='title')
@@ -258,7 +308,7 @@ def main(argv):
 
   gen.add_squares(puzzle, codex, reveal)
 
-  words = make_word_bank(puzzle, reveal, opts)
+  words = make_word_bank_v2(puzzle, reveal, opts)
 
   gen.add_words(words)
 
